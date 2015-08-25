@@ -143,19 +143,24 @@ function ahc_register_post_types()
 
         /* OK, it's safe for us to save the data now. */
 
-        // Make sure that it is set.
-        if (!isset($_POST['ahc_star_rating'])) {
-            return;
-        }
-
-        // Sanitize user input.
-        $my_data = sanitize_text_field($_POST['ahc_star_rating']);
-
-        $options = array(
-            "ahc_star_rating" => $_POST['ahc_star_rating']
+        $fields = array(
+            "ahc_price",
+            "ahc_star_rating"
         );
 
-        // Update the meta field in the database.
+        foreach ($fields as $field) {
+            // Make sure that it is set.
+            if (!isset($_POST[$field])) {
+                return;
+            }
+
+            // Sanitize user input.
+            $my_data = sanitize_text_field($_POST[$field]);
+
+            $options[$field] = $my_data;
+        }
+
+        // Update all the meta field in the database.
         update_post_meta($post_id, '_review_data', $options);
     }
 }
