@@ -5,6 +5,9 @@ add_action('wp_enqueue_scripts', 'ahc_enqueue_child_style');
 // register post types
 add_action('init', 'ahc_register_post_types');
 
+// add new options meta box
+add_action("add_meta_boxes_review", "ahc_review_meta_boxes");
+
 
 /**
  * Load Javascript / CSS Files used by the child theme
@@ -72,7 +75,27 @@ function ahc_register_post_types()
         )
     );
 
+    /**
+     * Registers the meta box for the review properties
+     */
+    function ahc_review_meta_boxes()
+    {
+        add_meta_box(
+            "ahc_review_properties",
+            "Product Review Properties",
+            "ahc_product_review_fields",
+            "review"
+        );
+    }
 
+    /**
+     * Fields for the meta boxes that are added on the review content type.
+     */
+    function ahc_product_review_fields()
+    {
+        wp_nonce_field("ahc_save_meta_box_data", "ahc_meta_box_nonce");
+        include( dirname(__FILE__) . '/templates/review_fields.php');
+    }
 }
 
 
