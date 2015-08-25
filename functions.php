@@ -8,6 +8,9 @@ add_action('init', 'ahc_register_post_types');
 // add new options meta box
 add_action("add_meta_boxes_review", "ahc_review_meta_boxes");
 
+// save meta data for review content type
+add_action('save_post', 'ahc_save_meta_box_data');
+
 
 /**
  * Load Javascript / CSS Files used by the child theme
@@ -91,10 +94,69 @@ function ahc_register_post_types()
     /**
      * Fields for the meta boxes that are added on the review content type.
      */
-    function ahc_product_review_fields()
+    function ahc_product_review_fields($post)
     {
         wp_nonce_field("ahc_save_meta_box_data", "ahc_meta_box_nonce");
-        include( dirname(__FILE__) . '/templates/review_fields.php');
+        $options = get_post_meta($post->ID, '_review_data', true);
+        include(dirname(__FILE__) . '/templates/review_fields.php');
+    }
+
+
+    /**
+     * When the post is saved, saves our custom data.
+     *
+     * @param int $post_id The ID of the post being saved.
+     */
+    function ahc_save_meta_box_data($post_id)
+    {
+
+        /*
+         * We need to verify this came from our screen and with proper authorization,
+         * because the save_post action can be triggered at other times.
+         */
+        // Check if our nonce is set.
+        if (!isset($_POST['ahc_meta_box_nonce'])) {
+            return;
+        }
+
+        // Verify that the nonce is valid.
+        if (!wp_verify_nonce($_POST['ahc_meta_box_nonce'], 'ahc_save_meta_box_data')) {
+            return;
+        }
+
+        // If this is an autosave, our form has not been submitted, so we don't want to do anything.
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        // Check the user's permissions.
+        if (isset($_POST['post_type']) && 'review' == $_POST['post_type']) {
+            if (!current_user_can('edit_page', $post_id)) {
+                return;
+            }
+
+        } else {
+            if (!current_user_can('edit_post', $post_id)) {
+                return;
+            }
+        }
+
+        /* OK, it's safe for us to save the data now. */
+
+        // Make sure that it is set.
+        if (!isset($_POST['ahc_star_rating'])) {
+            return;
+        }
+
+        // Sanitize user input.
+        $my_data = sanitize_text_field($_POST['ahc_star_rating']);
+
+        $options = array(
+            "ahc_star_rating" => $_POST['ahc_star_rating']
+        );
+
+        // Update the meta field in the database.
+        update_post_meta($post_id, '_review_data', $options);
     }
 }
 

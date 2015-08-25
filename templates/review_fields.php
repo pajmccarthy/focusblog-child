@@ -2,15 +2,15 @@
     <tbody>
     <tr>
         <th>Star Rating</th>
-        <td><input type="text" name="star_rating" value="" size="3"> stars</td>
+        <th><input type="text" name="ahc_star_rating" value="<?php echo (isset($options['ahc_star_rating']))? $options['ahc_star_rating']:""; ?>" size="3"> stars</th>
     </tr>
     <tr>
         <th>Option 2 Name</th>
-        <td>Option 2 Setting</td>
+        <th>Option 2 Setting</th>
     </tr>
     <tr>
         <th>Option 3 Name</th>
-        <td>Option 3 Setting</td>
+        <th>Option 3 Setting</th>
     </tr>
     </tbody>
 </table>
